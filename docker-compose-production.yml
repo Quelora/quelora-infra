@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-reverse-proxy
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - /etc/letsencrypt/live/quelora.org:/etc/letsencrypt/live/quelora.org:ro
+      - /etc/letsencrypt/archive/quelora.org:/etc/letsencrypt/archive/quelora.org:ro
+      - /etc/letsencrypt/renewal:/etc/letsencrypt/renewal:ro
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./certs/webroot:/etc/nginx/certs/webroot:ro
+    depends_on:
+      - app
+      - demo
+      - dashboard
+    networks:
+      - docker-network
+    restart: unless-stopped
+    cpus: '0.5'
+    mem_limit: '256M'
+    mem_reservation: '128M'
+
+  dashboard:
+    build:
+      context: ./source/quelora-dashboard
+      dockerfile: ../../Dockerfile
+    container_name: dashboard
+    ports:
+      - "3002:80"
+    networks:
+      - docker-network
+    restart: unless-stopped
+    cpus: '0.75'
+    mem_limit: '2GB'
+    mem_reservation: '256M'
+
+  demo:
+    image: node:20-alpine
+    container_name: node-demo
+    working_dir: /usr/src/app
+    volumes:
+      - ./source/quelora-demo:/usr/src/app
+      - ./source/quelora-client:/usr/src/app/quelora:ro
+      - demo_node_modules:/usr/src/app/node_modules
+      - ./utils/tree.js:/usr/src/app/tree.js:ro
+    command: sh -c "npm install --only=production && node run.js"
+    expose:
+      - "3001"
+    environment:
+      - NODE_ENV=production
+    #  - REDIS_URL=${REDIS_URL}
+    networks:
+      - docker-network
+    depends_on:
+      - redis
+    restart: unless-stopped
+    cpus: '0.5'
+    mem_limit: '384M'
+    mem_reservation: '192M'
+
+  app:
+    image: node:20-alpine
+    container_name: quelora
+    working_dir: /usr/src/app
+    volumes:
+      - ./source/quelora-api:/usr/src/app
+      - app_node_modules:/usr/src/app/node_modules
+      - ./utils/tree.js:/usr/src/app/tree.js:ro
+    command: sh -c "npm install --only=production && node app.js"
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      #- REDIS_URL=${REDIS_URL}
+      #- MONGO_URL=${MONGO_URL}
+    networks:
+      - docker-network
+    depends_on:
+      - redis
+      - mongo
+    restart: unless-stopped
+    cpus: '1.5'
+    mem_limit: '1536M'
+    mem_reservation: '768M'
+
+  redis:
+    image: redis:alpine
+    container_name: redis-internal
+    #command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6378:6379"
+    networks:
+      - docker-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+    cpus: '0.75'
+    mem_limit: '384M'
+    mem_reservation: '192M'
+
+  mongo:
+    image: mongo:4.4.0
+    container_name: mongo_db
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./mongo:/data/db
+    #environment:
+    #  - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+    #  - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    networks:
+      - docker-network
+    restart: unless-stopped
+    cpus: '1.25'
+    mem_limit: '1024M'
+    mem_reservation: '512M'
+
+volumes:
+  app_node_modules:
+  demo_node_modules:
+  dashboard_node_modules:
+
+networks:
+  docker-network:
+    driver: bridge
+    attachable: true

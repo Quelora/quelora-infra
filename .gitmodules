@@ -1,0 +1,15 @@
+[submodule "source/source/quelora-api"]
+	path = source/source/quelora-api
+	url = https://github.com/Quelora/quelora-api.git
+[submodule "source/quelora-api"]
+	path = source/quelora-api
+	url = https://github.com/Quelora/quelora-api.git
+[submodule "source/quelora-dashboard"]
+	path = source/quelora-dashboard
+	url = https://github.com/Quelora/quelora-dashboard.git
+[submodule "source/quelora-client"]
+	path = source/quelora-client
+	url = https://github.com/Quelora/quelora-client.git
+[submodule "source/quelora-demo"]
+	path = source/quelora-demo
+	url = https://github.com/Quelora/quelora-demo.git

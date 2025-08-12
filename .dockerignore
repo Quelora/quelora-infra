@@ -1,0 +1,9 @@
+node_modules
+mongo
+data
+.git
+.env
+*.log
+Dockerfile
+DockerfileQuelora
+docker-compose.yml

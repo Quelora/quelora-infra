@@ -1,0 +1,120 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-reverse-proxy
+    ports:
+      - "443:443"
+      - "444:444"
+      - "445:445"
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - app
+      - demo
+      - dashboard
+    networks:
+      - docker-network
+
+  dashboard:
+    image: node:20-alpine
+    container_name: dashboard
+    working_dir: /usr/src/app
+    volumes:
+      - ./source/quelora-dashboard:/usr/src/app
+      - dashboard_node_modules:/usr/src/app/node_modules
+      - ./utils/tree.js:/usr/src/app/tree.js:ro
+    command: sh -c "npm install && npm run start"
+    expose:
+      - "3002"
+    environment:
+      - NODE_ENV=development
+      - HOST=0.0.0.0
+      - PORT=3002
+      - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_PROTOCOL=ws
+    networks:
+      - docker-network
+
+  demo:
+    image: node:20-alpine
+    container_name: node-demo
+    working_dir: /usr/src/app
+    volumes:
+      - ./source/quelora-demo:/usr/src/app
+      - ./source/quelora-client:/usr/src/app/quelora:ro
+      - demo_node_modules:/usr/src/app/node_modules
+      - ./utils/tree.js:/usr/src/app/tree.js:ro
+    command: sh -c "npm install && npx nodemon run.js"
+    expose:
+      - "3001"
+    environment:
+      - NODE_ENV=development
+      #- REDIS_URL=redis://:GrZsuTC2G1nwpI9l8FWkhH3SjhlGiR@redis-internal:6379
+    networks:
+      - docker-network
+    depends_on:
+      - redis
+
+  app:
+    build:
+      context: .
+      dockerfile: DockerfileQuelora
+    container_name: quelora
+    working_dir: /usr/src/app
+    volumes:
+      - ./source/quelora-api:/usr/src/app  # Bind mount para desarrollo
+      - /usr/src/app/node_modules  # Volumen anónimo para node_modules
+      - ./utils/tree.js:/usr/src/app/tree.js:ro
+    command: sh -c "npm install && npx nodemon app.js"
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=development
+      #- REDIS_URL=redis://:GrZsuTC2G1nwpI9l8FWkhH3SjhlGiR@redis-internal:6379
+      #- MONGO_URL=mongodb://appuser:mymongopassword@mongo_db:27017/myapp
+    networks:
+      - docker-network
+    depends_on:
+      - redis
+      - mongo
+
+  redis:
+    image: redis:alpine
+    container_name: redis-internal
+    #command: redis-server --requirepass GrZsuTC2G1nwpI9l8FWkhH3SjhlGiR
+    ports:
+      - "6378:6379"
+    networks:
+      - docker-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  mongo:
+    image: mongo:4.4.0
+    container_name: mongo_db
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./mongo:/data/db
+    #environment:
+      #- MONGO_INITDB_ROOT_USERNAME=admin
+      #- MONGO_INITDB_ROOT_PASSWORD=4tdJ3Z7G823TSC0DuJPDYc2ymtmzeH
+      #- MONGO_INITDB_DATABASE=quelora
+    #command: mongod --auth
+    networks:
+      - docker-network
+
+volumes:
+  app_node_modules:
+  demo_node_modules:
+  dashboard_node_modules:
+
+networks:
+  docker-network:
+    driver: bridge
+    attachable: true

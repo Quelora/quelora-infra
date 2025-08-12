@@ -1,0 +1,5 @@
+mongo/*
+!mongo/.gitkeep
+certs/*
+!certs/.gitkeep
+.env
