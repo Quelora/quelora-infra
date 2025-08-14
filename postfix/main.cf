@@ -1,0 +1,15 @@
+myhostname = mail.quelora.org
+mydomain = quelora.org
+myorigin = $mydomain
+inet_interfaces = all
+inet_protocols = ipv4
+mydestination = $myhostname, localhost.$mydomain, localhost
+mynetworks = 172.18.0.0/16, 127.0.0.0/8
+smtpd_banner = $myhostname ESMTP
+biff = no
+
+# DKIM
+milter_default_action = accept
+milter_protocol = 6
+smtpd_milters = inet:localhost:8891
+non_smtpd_milters = $smtpd_milters

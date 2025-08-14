@@ -63,30 +63,32 @@ services:
     mem_reservation: '192M'
 
   app:
-    image: node:20-alpine
+    build:
+      context: .
+      dockerfile: DockerfileQuelora
     container_name: quelora
     working_dir: /usr/src/app
     volumes:
       - ./source/quelora-api:/usr/src/app
       - app_node_modules:/usr/src/app/node_modules
       - ./utils/tree.js:/usr/src/app/tree.js:ro
-    command: sh -c "npm install --only=production && node app.js"
+    command: sh -c "npm ci --only=production && node app.js"
     expose:
       - "3000"
     environment:
       - NODE_ENV=production
-      #- REDIS_URL=${REDIS_URL}
-      #- MONGO_URL=${MONGO_URL}
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
     networks:
       - docker-network
     depends_on:
       - redis
       - mongo
+      - postfix
     restart: unless-stopped
     cpus: '1.5'
     mem_limit: '1536M'
     mem_reservation: '768M'
-
+  
   redis:
     image: redis:alpine
     container_name: redis-internal
@@ -122,10 +124,34 @@ services:
     mem_limit: '1024M'
     mem_reservation: '512M'
 
+  postfix:
+    image: boky/postfix
+    container_name: quelora-postfix
+    restart: always
+    hostname: mail.quelora.org
+    environment:
+      maildomain: quelora.org
+      smtp_user: "noreply@quelora.org:password123"
+      mynetworks: "172.18.0.0/16,127.0.0.0/8"
+      relayhost: ""
+      ALLOWED_SENDER_DOMAINS: "quelora.org" 
+      SMTPD_SASL_USERS: "noreply@quelora.org:password123"
+    ports:
+      - "25:25"
+      - "587:587"
+    volumes:
+    - ./opendkim/keys:/etc/opendkim/keys:rw
+    - ./opendkim/opendkim.conf:/etc/opendkim.conf
+    - ./postfix/start-postfix.sh:/start-postfix.sh:ro
+    - quelora_postfix_spool:/var/spool/postfix
+    networks:
+      - docker-network
+
 volumes:
   app_node_modules:
   demo_node_modules:
   dashboard_node_modules:
+  quelora_postfix_spool:
 
 networks:
   docker-network:

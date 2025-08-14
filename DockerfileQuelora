@@ -6,7 +6,10 @@ RUN apt-get update && \
     wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
     sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' && \
     apt-get update && \
-    apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 --no-install-recommends && \
+    apt-get install -y google-chrome-stable \
+    fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
+    libxss1 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 \
+    libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2 --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
 # 2. Configura Puppeteer
@@ -16,17 +19,19 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 # 3. Configura el workspace
 WORKDIR /usr/src/app
 
-# 4. Copia e instala dependencias
-COPY ./source/quelora-api/package.json .
-COPY ./source/quelora-api/package-lock.json* ./
-RUN npm install --unsafe-perm
-
-# 5. Copia el resto del código
-COPY ./source/quelora-api .
-
-# 6. Configura usuario no-root
+# 4. Configura permisos antes de copiar
 RUN chown -R node:node /usr/src/app
+
+# 5. Cambia al usuario node
 USER node
 
+# 6. Copia e instala dependencias
+COPY --chown=node:node ./source/quelora-api/package.json .
+COPY --chown=node:node ./source/quelora-api/package-lock.json* ./
+RUN npm install --only=production --no-optional
+
+# 7. Copia el resto del código
+COPY --chown=node:node ./source/quelora-api .
+
 EXPOSE 3000
-CMD ["npx", "nodemon", "app.js"]
+CMD ["node", "app.js"]
