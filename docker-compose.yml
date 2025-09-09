@@ -43,7 +43,7 @@ services:
     working_dir: /usr/src/app
     volumes:
       - ./source/quelora-demo:/usr/src/app
-      - ./source/quelora-client:/usr/src/app/quelora:ro
+      - ./source/quelora-client:/usr/src/app/quelora:rW
       - demo_node_modules:/usr/src/app/node_modules
       - ./utils/tree.js:/usr/src/app/tree.js:ro
     command: sh -c "npm install && npx nodemon run.js"
