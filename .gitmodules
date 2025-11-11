@@ -13,3 +13,6 @@
 [submodule "source/quelora-demo"]
 	path = source/quelora-demo
 	url = https://github.com/Quelora/quelora-demo.git
+[submodule "quelora/packages/quelora-common"]
+	path = quelora/packages/quelora-common
+	url = https://github.com/Quelora/quelora-common.git
