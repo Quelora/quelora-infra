@@ -6,12 +6,14 @@ services:
       - "443:443"
       - "444:444"
       - "445:445"
+      - "446:446"
       - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs:/etc/nginx/certs:ro
     depends_on:
       - app
+      - app-dashboard
       - demo
       - dashboard
     networks:
@@ -58,27 +60,74 @@ services:
       - redis
 
   app:
+    container_name: quelora-api
     build:
-      context: .
-      dockerfile: DockerfileQuelora
-    container_name: quelora
-    working_dir: /usr/src/app
+      context: ./quelora 
+      dockerfile: Dockerfile.api
     volumes:
-      - ./source/quelora-api:/usr/src/app  # Bind mount para desarrollo
-      - /usr/src/app/node_modules  # Volumen anónimo para node_modules
+      - ./quelora/packages/quelora-public-api:/usr/src/app/packages/quelora-public-api
+      - ./quelora/packages/quelora-common:/usr/src/app/packages/quelora-common
       - ./utils/tree.js:/usr/src/app/tree.js:ro
-    command: sh -c "npm install && npx nodemon app.js"
+      - app_monorepo_node_modules:/usr/src/app/node_modules
+    env_file:
+      - ./quelora/packages/quelora-public-api/.env
+    command: sh -c "npm install && npx nodemon app.js" 
     expose:
       - "3000"
     environment:
       - NODE_ENV=development
-      #- REDIS_URL=redis://:GrZsuTC2G1nwpI9l8FWkhH3SjhlGiR@redis-internal:6379
-      #- MONGO_URL=mongodb://appuser:mymongopassword@mongo_db:27017/myapp
+    networks:
+      - docker-network 
+    depends_on:
+      - redis
+      - mongo 
+
+  app-dashboard:
+    container_name: quelora-dashboard-api
+    build:
+      context: ./quelora
+      dockerfile: Dockerfile.dashboard-api
+    volumes:
+      - ./quelora/packages/quelora-dashboard-api:/usr/src/app/packages/quelora-dashboard-api
+      - ./quelora/packages/quelora-common:/usr/src/app/packages/quelora-common
+      - ./quelora/packages/quelora-public-api:/usr/src/app/packages/quelora-public-api
+      - ./utils/tree.js:/usr/src/app/tree.js:ro
+      - app_monorepo_node_modules:/usr/src/app/node_modules
+    env_file:
+      - ./quelora/packages/quelora-dashboard-api/.env 
+    command: sh -c "npm install && npx nodemon app.js"
+    expose:
+      - "3010"
+    environment:
+      - NODE_ENV=development
     networks:
       - docker-network
     depends_on:
       - redis
       - mongo
+
+  #app:
+  #  build:
+  #    context: .
+  #    dockerfile: DockerfileQuelora
+  #  container_name: quelora
+  #  working_dir: /usr/src/app
+  #  volumes:
+  #    - ./source/quelora-api:/usr/src/app  # Bind mount para desarrollo
+  #    - /usr/src/app/node_modules  # Volumen anónimo para node_modules
+  #    - ./utils/tree.js:/usr/src/app/tree.js:ro
+  #  command: sh -c "npm install && npx nodemon app.js"
+  #  expose:
+  #    - "3000"
+  #  environment:
+  #    - NODE_ENV=development
+  #    #- REDIS_URL=redis://:GrZsuTC2G1nwpI9l8FWkhH3SjhlGiR@redis-internal:6379
+  #    #- MONGO_URL=mongodb://appuser:mymongopassword@mongo_db:27017/myapp
+  #  networks:
+  #    - docker-network
+  #  depends_on:
+  #    - redis 
+  #    - mongo
 
   redis:
     image: redis:alpine
@@ -110,7 +159,7 @@ services:
       - docker-network
 
 volumes:
-  app_node_modules:
+  app_monorepo_node_modules:
   demo_node_modules:
   dashboard_node_modules:
 
