@@ -13,9 +13,12 @@
 [submodule "quelora/packages/quelora-common"]
 	path = quelora/packages/quelora-common
 	url = https://github.com/Quelora/quelora-common.git
+	branch = main
 [submodule "quelora/packages/quelora-public-api"]
 	path = quelora/packages/quelora-public-api
 	url = https://Quelora@github.com/Quelora/quelora-public-api.git
+	branch = main
 [submodule "quelora/packages/quelora-dashboard-api"]
 	path = quelora/packages/quelora-dashboard-api
 	url = https://Quelora@github.com/Quelora/quelora-dashboard-api.git
+	branch = main
