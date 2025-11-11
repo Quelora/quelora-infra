@@ -16,3 +16,6 @@
 [submodule "quelora/packages/quelora-common"]
 	path = quelora/packages/quelora-common
 	url = https://github.com/Quelora/quelora-common.git
+[submodule "quelora/packages/quelora-public-api"]
+	path = quelora/packages/quelora-public-api
+	url = https://Quelora@github.com/Quelora/quelora-public-api.git
