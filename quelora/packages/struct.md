@@ -33,9 +33,15 @@
 │   │   └── validateClientHeaderMiddleware.js
 │   ├── models
 │   │   ├── Activity.js
+│   │   ├── AdCampaign.js
+│   │   ├── AdCreative.js
+│   │   ├── AdvertiserProfile.js
+│   │   ├── Client.js
 │   │   ├── Comment.js
 │   │   ├── CommentAnalysis.js
 │   │   ├── CommentAudio.js
+│   │   ├── Placement.js
+│   │   ├── PlacementPricing.js
 │   │   ├── Post.js
 │   │   ├── Profile.js
 │   │   ├── ProfileBlock.js
@@ -48,9 +54,7 @@
 │   │   ├── ProfileShare.js
 │   │   ├── ReportedComment.js
 │   │   ├── Survey.js
-│   │   ├── SurveyResponse.js
-│   │   ├── User.js
-│   │   └── UserSchema.js
+│   │   └── SurveyResponse.js
 │   ├── moderationProviders
 │   │   ├── DeepSeekModerationProvider.js
 │   │   ├── GeminiModerationProvider.js
@@ -71,7 +75,6 @@
 │   │   ├── loggerService.js
 │   │   ├── moderateService.js
 │   │   ├── profileService.js
-│   │   ├── pushNotificationService.js
 │   │   ├── pushService.js
 │   │   ├── ssoService.js
 │   │   ├── surveyService.js
@@ -106,20 +109,43 @@
 │   ├── config
 │   │   └── commentAnalysisNolanPromptConfig.js
 │   ├── controllers
+│   │   ├── adCampaignController.js
+│   │   ├── adminController.js
+│   │   ├── advertiserProfileController.js
 │   │   ├── authController.js
 │   │   ├── clientController.js
+│   │   ├── mediaController.js
 │   │   ├── notificationsController.js
+│   │   ├── placementController.js
+│   │   ├── placementPricingController.js
 │   │   ├── statsController.js
+│   │   ├── surveyController.js
 │   │   └── userController.js
 │   ├── cron
+│   │   ├── adStatsJob.js
 │   │   ├── dailyRollupJob.js
 │   │   ├── discoveryJob.js
 │   │   ├── index.js
 │   │   ├── profileStatsJob.js
 │   │   ├── statsJob.js
 │   │   └── tokenUsageRollupJob.js
+│   ├── locale
+│   │   ├── ar.json
+│   │   ├── de.json
+│   │   ├── en.json
+│   │   ├── es.json
+│   │   ├── fr.json
+│   │   ├── he.json
+│   │   ├── hi.json
+│   │   ├── it.json
+│   │   ├── jp.json
+│   │   ├── pt.json
+│   │   ├── ru.json
+│   │   └── zh.json
 │   ├── middlewares
-│   │   └── adminAuthMiddleware.js
+│   │   ├── adminAuthMiddleware.js
+│   │   ├── roleAuthMiddleware.js
+│   │   └── uploadMiddleware.js
 │   ├── models
 │   │   ├── GeoPostStats.js
 │   │   ├── GeoStats.js
@@ -128,15 +154,22 @@
 │   │   ├── ProfileStatsDaily.js
 │   │   ├── Stats.js
 │   │   ├── TokenUsageStats.js
-│   │   └── User.js
+│   │   ├── User.js
+│   │   └── UserSchema.js
 │   ├── package.json
 │   ├── public
 │   │   └── assets
-│   │       └── german_1762889674146.webp
 │   ├── routes
+│   │   ├── adCampaignRoutes.js
+│   │   ├── adminRoutes.js
+│   │   ├── advertiserProfileRoutes.js
 │   │   ├── authRoutes.js
 │   │   ├── clientRoutes.js
+│   │   ├── healthRoutes.js
+│   │   ├── mediaRoutes.js
 │   │   ├── notificationsRoutes.js
+│   │   ├── placementPricingRoutes.js
+│   │   ├── placementRoutes.js
 │   │   ├── routes.js
 │   │   ├── statsRoutes.js
 │   │   └── userRoutes.js
@@ -153,23 +186,32 @@
 │   │   ├── config
 │   │   │   └── geoData.js
 │   │   ├── empty.nosql
+│   │   ├── migrateClients.js
 │   │   ├── nohup.out
 │   │   ├── seedAdminUser.js
 │   │   ├── seedComments.js
 │   │   ├── seedFakerUser.js
 │   │   ├── seedVAPID.js
 │   │   └── seed_start.sh
-│   └── services
-│       ├── commentAnalysisNolanService.js
-│       ├── puppeteerService.js
-│       ├── statsRollupService.js
-│       └── statsService.js
+│   ├── services
+│   │   ├── adCampaignService.js
+│   │   ├── adStatsService.js
+│   │   ├── commentAnalysisNolanService.js
+│   │   ├── puppeteerService.js
+│   │   ├── statsRollupService.js
+│   │   └── statsService.js
+│   ├── templates
+│   │   └── emails
+│   │       └── verificationTemplate.js
+│   └── utils
+│       └── accessControl.js
 ├── quelora-public-api
 │   ├── .env
 │   ├── .env.example
 │   ├── .gitignore
 │   ├── app.js
 │   ├── controllers
+│   │   ├── adController.js
 │   │   ├── commentController.js
 │   │   ├── notificationsController.js
 │   │   ├── postController.js
@@ -181,11 +223,8 @@
 │   ├── public
 │   │   ├── .gitkeep
 │   │   └── assets
-│   │       ├── .gitkeep
-│   │       ├── 1f912bd89888338fed818a2d24a7f404ff58412679d584870c0f4ec35c43ea21.background.webp
-│   │       ├── 34cc22e898190b12b9cf7c621c0552e84833f35964d6a3ae18126d142cba3e52.background.webp
-│   │       └── 34cc22e898190b12b9cf7c621c0552e84833f35964d6a3ae18126d142cba3e52.webp
 │   ├── routes
+│   │   ├── adRoutes.js
 │   │   ├── authRoutes.js
 │   │   ├── commentRoutes.js
 │   │   ├── notificationsRoutes.js
@@ -195,8 +234,18 @@
 │   │   ├── ssoRoutes.js
 │   │   └── surveyRoutes.js
 │   ├── services
+│   │   ├── adsService.js
 │   │   └── webSocketService.js
 │   └── templates
 │       └── emails
 │           └── verificationTemplate.js
+├── quelora-worker
+│   ├── .env
+│   ├── .gitignore
+│   ├── index.js
+│   ├── package.json
+│   └── processors
+│       ├── emailProcessor.js
+│       ├── metrics.js
+│       └── pushProcessor.js
 └── struct.md

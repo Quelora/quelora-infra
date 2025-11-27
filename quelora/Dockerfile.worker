@@ -1,0 +1,46 @@
+# Stage 1: Base image
+FROM node:20-slim AS base
+
+# Stage 2: Pruner (Instalador de dependencias de producción)
+FROM base AS pruner
+WORKDIR /usr/src/app
+RUN chown -R node:node /usr/src/app
+USER node
+
+# Copiar todos los package.json para resolver workspaces
+COPY --chown=node:node package.json .
+COPY --chown=node:node packages/quelora-public-api/package.json ./packages/quelora-public-api/
+COPY --chown=node:node packages/quelora-common/package.json ./packages/quelora-common/
+COPY --chown=node:node packages/quelora-dashboard-api/package.json ./packages/quelora-dashboard-api/
+# NUEVO: Copiar package.json del worker
+COPY --chown=node:node packages/quelora-worker/package.json ./packages/quelora-worker/
+
+# Copiar el código fuente necesario
+COPY --chown=node:node packages/quelora-public-api ./packages/quelora-public-api
+COPY --chown=node:node packages/quelora-common ./packages/quelora-common
+COPY --chown=node:node packages/quelora-dashboard-api ./packages/quelora-dashboard-api
+# NUEVO: Copiar código del worker
+COPY --chown=node:node packages/quelora-worker ./packages/quelora-worker
+
+# Instalar solo dependencias de PRODUCCIÓN
+RUN npm install --only=production --no-optional
+
+# Stage 3: Final (Imagen de producción)
+FROM base AS final
+WORKDIR /usr/src/app
+RUN chown -R node:node /usr/src/app
+USER node
+
+# Copiar los node_modules optimizados
+COPY --chown=node:node --from=pruner /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=pruner /usr/src/app/package.json .
+
+# Copiar el código fuente necesario para el worker y common
+COPY --chown=node:node --from=pruner /usr/src/app/packages/quelora-common ./packages/quelora-common
+COPY --chown=node:node --from=pruner /usr/src/app/packages/quelora-worker ./packages/quelora-worker
+
+# Establecer el directorio de trabajo en el WORKER
+WORKDIR /usr/src/app/packages/quelora-worker
+
+# El worker no suele exponer puerto HTTP, pero se deja por si acaso (healthchecks)
+CMD ["node", "index.js"]
