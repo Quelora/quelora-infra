@@ -22,3 +22,6 @@
 	path = quelora/packages/quelora-dashboard-api
 	url = https://Quelora@github.com/Quelora/quelora-dashboard-api.git
 	branch = main
+[submodule "quelora/packages/quelora-worker"]
+	path = quelora/packages/quelora-worker
+	url = https://Quelora@github.com/Quelora/quelora-worker.git
