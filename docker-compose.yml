@@ -11,6 +11,8 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs:/etc/nginx/certs:ro
+      # CAMBIO: Mapeamos la carpeta local './quelora-storage/assets'
+      - ./quelora-storage/assets:/var/www/assets:ro 
     depends_on:
       - app
       - app-dashboard
@@ -39,6 +41,24 @@ services:
     networks:
       - docker-network
 
+  mailcrab:
+    image: marlonb/mailcrab
+    ports:
+      - 1080:1080
+    networks:
+      - docker-network
+
+  postfix:
+    image: juanluisbaptiste/postfix
+    environment:
+      - SMTP_SERVER=mailcrab
+      - SMTP_PORT=1025
+      - SERVER_HOSTNAME=mail.localhost
+    ports:
+      - 1025:25
+    networks:
+      - docker-network
+
   demo:
     image: node:20-alpine
     container_name: node-demo
@@ -53,7 +73,6 @@ services:
       - "3001"
     environment:
       - NODE_ENV=development
-      #- REDIS_URL=redis://:GrZsuTC2G1nwpI9l8FWkhH3SjhlGiR@redis-internal:6379
     networks:
       - docker-network
     depends_on:
@@ -69,6 +88,9 @@ services:
       - ./quelora/packages/quelora-common:/usr/src/app/packages/quelora-common
       - ./utils/tree.js:/usr/src/app/tree.js:ro
       - app_monorepo_node_modules:/usr/src/app/node_modules
+      
+      # CAMBIO: Usamos carpeta local para persistencia real fuera de Docker
+      - ./quelora-storage/assets:/usr/src/app/packages/quelora-public-api/public/assets
     env_file:
       - ./quelora/packages/quelora-public-api/.env
     command: sh -c "npm install && npx nodemon app.js" 
@@ -93,6 +115,9 @@ services:
       - ./quelora/packages/quelora-public-api:/usr/src/app/packages/quelora-public-api
       - ./utils/tree.js:/usr/src/app/tree.js:ro
       - app_monorepo_node_modules:/usr/src/app/node_modules
+      
+      # CAMBIO: Carpeta local compartida
+      - ./quelora-storage/assets:/usr/src/app/packages/quelora-public-api/public/assets
     env_file:
       - ./quelora/packages/quelora-dashboard-api/.env 
     command: sh -c "npm install && npx nodemon app.js"
@@ -106,33 +131,33 @@ services:
       - redis
       - mongo
 
-  #app:
-  #  build:
-  #    context: .
-  #    dockerfile: DockerfileQuelora
-  #  container_name: quelora
-  #  working_dir: /usr/src/app
-  #  volumes:
-  #    - ./source/quelora-api:/usr/src/app  # Bind mount para desarrollo
-  #    - /usr/src/app/node_modules  # Volumen anónimo para node_modules
-  #    - ./utils/tree.js:/usr/src/app/tree.js:ro
-  #  command: sh -c "npm install && npx nodemon app.js"
-  #  expose:
-  #    - "3000"
-  #  environment:
-  #    - NODE_ENV=development
-  #    #- REDIS_URL=redis://:GrZsuTC2G1nwpI9l8FWkhH3SjhlGiR@redis-internal:6379
-  #    #- MONGO_URL=mongodb://appuser:mymongopassword@mongo_db:27017/myapp
-  #  networks:
-  #    - docker-network
-  #  depends_on:
-  #    - redis 
-  #    - mongo
+  worker:
+    container_name: quelora-worker
+    build:
+      context: ./quelora
+      dockerfile: Dockerfile.worker
+    volumes:
+      - ./quelora/packages/quelora-worker:/usr/src/app/packages/quelora-worker
+      - ./quelora/packages/quelora-common:/usr/src/app/packages/quelora-common
+      - app_monorepo_node_modules:/usr/src/app/node_modules
+      
+      # CAMBIO: Carpeta local compartida
+      - ./quelora-storage/assets:/usr/src/app/packages/quelora-public-api/public/assets
+    env_file:
+      - ./quelora/packages/quelora-public-api/.env
+    command: sh -c "npm install && npx nodemon index.js"
+    environment:
+      - NODE_ENV=development
+      - CACHE_REDIS_URL=redis://redis-internal:6379
+    networks:
+      - docker-network
+    depends_on:
+      - redis
+      - mongo
 
   redis:
     image: redis:alpine
     container_name: redis-internal
-    #command: redis-server --requirepass GrZsuTC2G1nwpI9l8FWkhH3SjhlGiR
     ports:
       - "6378:6379"
     networks:
@@ -150,11 +175,6 @@ services:
       - "27018:27017"
     volumes:
       - ./mongo:/data/db
-    #environment:
-      #- MONGO_INITDB_ROOT_USERNAME=admin
-      #- MONGO_INITDB_ROOT_PASSWORD=4tdJ3Z7G823TSC0DuJPDYc2ymtmzeH
-      #- MONGO_INITDB_DATABASE=quelora
-    #command: mongod --auth
     networks:
       - docker-network
 

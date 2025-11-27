@@ -1,6 +1,5 @@
 FROM node:20-slim
 
-# 1. Instala Chrome y dependencias
 RUN apt-get update && \
     apt-get install -y wget gnupg && \
     wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
@@ -12,25 +11,24 @@ RUN apt-get update && \
     libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2 --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# 2. Configura Puppeteer
+
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 
-# 3. Configura el workspace
+
 WORKDIR /usr/src/app
 
 # 4. Configura permisos antes de copiar
 RUN chown -R node:node /usr/src/app
 
-# 5. Cambia al usuario node
+
 USER node
 
-# 6. Copia e instala dependencias
+
 COPY --chown=node:node ./source/quelora-api/package.json .
 COPY --chown=node:node ./source/quelora-api/package-lock.json* ./
 RUN npm install --only=production --no-optional
 
-# 7. Copia el resto del código
 COPY --chown=node:node ./source/quelora-api .
 
 EXPOSE 3000

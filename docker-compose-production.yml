@@ -1,6 +1,9 @@
 version: '3.8'
 
 services:
+  # ------------------------------------------------
+  # PROXY & FRONTEND
+  # ------------------------------------------------
   nginx:
     image: nginx:alpine
     container_name: nginx-reverse-proxy
@@ -15,7 +18,7 @@ services:
       - ./certs/webroot:/etc/nginx/certs/webroot:ro
     depends_on:
       - app
-      - demo
+      - app-dashboard
       - dashboard
     networks:
       - docker-network
@@ -25,12 +28,14 @@ services:
     mem_reservation: '128M'
 
   dashboard:
+    # Asumo que el frontend sigue en su ubicación original o
+    # debes ajustar el contexto si también lo moviste al monorepo.
     build:
       context: ./source/quelora-dashboard
-      dockerfile: ../../Dockerfile
+      dockerfile: ../../Dockerfile 
     container_name: dashboard
     ports:
-      - "3002:80"
+      - "3002:80" # Exponemos el puerto del contenedor (asumiendo nginx interno)
     networks:
       - docker-network
     restart: unless-stopped
@@ -38,46 +43,27 @@ services:
     mem_limit: '2GB'
     mem_reservation: '256M'
 
-  demo:
-    image: node:20-alpine
-    container_name: node-demo
-    working_dir: /usr/src/app
-    volumes:
-      - ./source/quelora-demo:/usr/src/app
-      - ./source/quelora-client:/usr/src/app/quelora:ro
-      - demo_node_modules:/usr/src/app/node_modules
-      - ./utils/tree.js:/usr/src/app/tree.js:ro
-    command: sh -c "npm install --only=production && node run.js"
-    expose:
-      - "3001"
-    environment:
-      - NODE_ENV=production
-    #  - REDIS_URL=${REDIS_URL}
-    networks:
-      - docker-network
-    depends_on:
-      - redis
-    restart: unless-stopped
-    cpus: '0.5'
-    mem_limit: '384M'
-    mem_reservation: '192M'
-
+  # ------------------------------------------------
+  # BACKEND MONOREPO SERVICES
+  # ------------------------------------------------
   app:
+    container_name: quelora-api
     build:
-      context: .
-      dockerfile: DockerfileQuelora
-    container_name: quelora
-    working_dir: /usr/src/app
+      context: ./quelora
+      dockerfile: Dockerfile.api
+    # IMPORTANTE: En prod NO montamos el código fuente como volumen.
+    # La imagen construida debe contener el código (COPY . . en el Dockerfile)
     volumes:
-      - ./source/quelora-api:/usr/src/app
-      - app_node_modules:/usr/src/app/node_modules
       - ./utils/tree.js:/usr/src/app/tree.js:ro
-    command: sh -c "npm ci --only=production && node app.js"
-    expose:
-      - "3000"
+      # Si necesitas persistir logs o uploads, agrega esos volúmenes aquí.
+    env_file:
+      - ./quelora/packages/quelora-public-api/.env
     environment:
       - NODE_ENV=production
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
+    command: sh -c "npm run start" # O "node app.js", evita nodemon en prod
+    expose:
+      - "3000"
     networks:
       - docker-network
     depends_on:
@@ -88,11 +74,39 @@ services:
     cpus: '1.5'
     mem_limit: '1536M'
     mem_reservation: '768M'
-  
+
+  app-dashboard:
+    container_name: quelora-dashboard-api
+    build:
+      context: ./quelora
+      dockerfile: Dockerfile.dashboard-api
+    volumes:
+      - ./utils/tree.js:/usr/src/app/tree.js:ro
+    env_file:
+      - ./quelora/packages/quelora-dashboard-api/.env
+    environment:
+      - NODE_ENV=production
+    command: sh -c "npm run start" # Ajusta según tu package.json
+    expose:
+      - "3010"
+    networks:
+      - docker-network
+    depends_on:
+      - redis
+      - mongo
+    restart: unless-stopped
+    # Asigné recursos moderados, ajusta según carga real
+    cpus: '1.0'
+    mem_limit: '1024M'
+    mem_reservation: '512M'
+
+  # ------------------------------------------------
+  # INFRASTRUCTURE
+  # ------------------------------------------------
   redis:
     image: redis:alpine
     container_name: redis-internal
-    #command: redis-server --requirepass ${REDIS_PASSWORD}
+    # command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
       - "6378:6379"
     networks:
@@ -114,43 +128,17 @@ services:
       - "27018:27017"
     volumes:
       - ./mongo:/data/db
-    #environment:
-    #  - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
-    #  - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    # environment:
+    #   - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+    #   - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     networks:
       - docker-network
     restart: unless-stopped
-    cpus: '1.25'
-    mem_limit: '1024M'
-    mem_reservation: '512M'
-
-  postfix:
-    image: boky/postfix
-    container_name: quelora-postfix
-    restart: always
-    hostname: mail.quelora.org
-    environment:
-      maildomain: quelora.org
-      smtp_user: "noreply@quelora.org:password123"
-      mynetworks: "172.18.0.0/16,127.0.0.0/8"
-      relayhost: ""
-      ALLOWED_SENDER_DOMAINS: "quelora.org" 
-      SMTPD_SASL_USERS: "noreply@quelora.org:password123"
-    ports:
-      - "25:25"
-      - "587:587"
-    volumes:
-    - ./opendkim/keys:/etc/opendkim/keys:rw
-    - ./opendkim/opendkim.conf:/etc/opendkim.conf
-    - ./postfix/start-postfix.sh:/start-postfix.sh:ro
-    - quelora_postfix_spool:/var/spool/postfix
-    networks:
-      - docker-network
+    cpus: '2.5'
+    mem_limit: '2048M'
+    mem_reservation: '1024M'
 
 volumes:
-  app_node_modules:
-  demo_node_modules:
-  dashboard_node_modules:
   quelora_postfix_spool:
 
 networks:

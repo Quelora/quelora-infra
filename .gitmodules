@@ -12,7 +12,7 @@
 	url = https://github.com/Quelora/quelora-demo.git
 [submodule "quelora/packages/quelora-common"]
 	path = quelora/packages/quelora-common
-	url = https://github.com/Quelora/quelora-common.git
+	url = https://Quelora@github.com/Quelora/quelora-common.git
 	branch = main
 [submodule "quelora/packages/quelora-public-api"]
 	path = quelora/packages/quelora-public-api
