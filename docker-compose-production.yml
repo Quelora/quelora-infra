@@ -26,7 +26,12 @@ services:
     cpus: '0.5'
     mem_limit: '256M'
     mem_reservation: '128M'
-
+    ulimits:
+          nofile:
+            soft: 65535
+            hard: 65535
+    sysctls:
+      - net.core.somaxconn=4096
   dashboard:
     # Asumo que el frontend sigue en su ubicación original o
     # debes ajustar el contexto si también lo moviste al monorepo.
@@ -74,7 +79,10 @@ services:
     cpus: '1.5'
     mem_limit: '1536M'
     mem_reservation: '768M'
-
+    ulimits:  
+      nofile:
+        soft: 65535
+        hard: 65535
   app-dashboard:
     container_name: quelora-dashboard-api
     build:

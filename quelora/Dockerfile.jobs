@@ -1,0 +1,55 @@
+# Stage 1: Base image
+FROM node:20-slim AS base
+
+# Stage 2: Pruner (Builder & Installer)
+FROM base AS pruner
+WORKDIR /usr/src/app
+RUN chown -R node:node /usr/src/app
+USER node
+
+# 1. Copiar package.json RAÍZ y de TODOS los workspaces
+COPY --chown=node:node package.json .
+COPY --chown=node:node packages/quelora-common/package.json ./packages/quelora-common/
+COPY --chown=node:node packages/quelora-jobs/package.json ./packages/quelora-jobs/
+
+# ✅ NUEVO: Copiar el package.json de Enterprise para que npm sepa que existe el workspace
+COPY --chown=node:node packages/quelora-enterprise/package.json ./packages/quelora-enterprise/
+
+# (Opcional) Copiamos los json de otros paquetes para evitar warnings
+COPY --chown=node:node packages/quelora-public-api/package.json ./packages/quelora-public-api/
+COPY --chown=node:node packages/quelora-dashboard-api/package.json ./packages/quelora-dashboard-api/
+COPY --chown=node:node packages/quelora-worker/package.json ./packages/quelora-worker/
+
+# 2. Copiar código fuente necesario para el build
+COPY --chown=node:node packages/quelora-common ./packages/quelora-common
+COPY --chown=node:node packages/quelora-jobs ./packages/quelora-jobs
+
+# ✅ NUEVO: Copiar el código fuente de Enterprise para que npm pueda instalarlo/linkearlo
+COPY --chown=node:node packages/quelora-enterprise ./packages/quelora-enterprise
+
+# 3. Instalar dependencias de producción
+RUN npm install --only=production --no-optional
+
+# Stage 3: Final (Imagen de ejecución ligera)
+FROM base AS final
+WORKDIR /usr/src/app
+RUN chown -R node:node /usr/src/app
+USER node
+
+# 1. Copiar los node_modules ya instalados
+COPY --chown=node:node --from=pruner /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=pruner /usr/src/app/package.json .
+
+# 2. Copiar SOLO el código fuente que este contenedor va a usar
+COPY --chown=node:node --from=pruner /usr/src/app/packages/quelora-common ./packages/quelora-common
+COPY --chown=node:node --from=pruner /usr/src/app/packages/quelora-jobs ./packages/quelora-jobs
+
+# ✅ NUEVO: Copiar Enterprise a la imagen final (Runtime)
+COPY --chown=node:node --from=pruner /usr/src/app/packages/quelora-enterprise ./packages/quelora-enterprise
+
+# 3. Establecer directorio de trabajo
+WORKDIR /usr/src/app/packages/quelora-jobs
+
+# 4. Variables de entorno y CMD
+ENV NODE_ENV=production
+CMD ["node", "index.js"]

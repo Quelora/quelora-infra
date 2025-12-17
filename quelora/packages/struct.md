@@ -1,3 +1,4 @@
+├── .gitignore
 ├── quelora-common
 │   ├── config
 │   │   ├── commentAnalysisPromptConfig.js
@@ -30,19 +31,19 @@
 │   │   ├── rateLimiterMiddleware.js
 │   │   ├── requestLogger.js
 │   │   ├── responseCompressor.js
-│   │   └── validateClientHeaderMiddleware.js
+│   │   ├── trackUserPresence.js
+│   │   ├── validateClientHeaderMiddleware.js
+│   │   └── validatePasswordResetTokenMiddleware.js
 │   ├── models
 │   │   ├── Activity.js
-│   │   ├── AdCampaign.js
-│   │   ├── AdCreative.js
-│   │   ├── AdvertiserProfile.js
 │   │   ├── Client.js
 │   │   ├── Comment.js
-│   │   ├── CommentAnalysis.js
 │   │   ├── CommentAudio.js
-│   │   ├── Placement.js
-│   │   ├── PlacementPricing.js
+│   │   ├── GeoPostStats.js
+│   │   ├── GeoStats.js
+│   │   ├── JobExecutionLog.js
 │   │   ├── Post.js
+│   │   ├── PostStats.js
 │   │   ├── Profile.js
 │   │   ├── ProfileBlock.js
 │   │   ├── ProfileBookmark.js
@@ -51,10 +52,16 @@
 │   │   ├── ProfileFollower.js
 │   │   ├── ProfileFollowing.js
 │   │   ├── ProfileLike.js
+│   │   ├── ProfileNotInterested.js
 │   │   ├── ProfileShare.js
+│   │   ├── ProfileStats.js
+│   │   ├── ProfileStatsDaily.js
+│   │   ├── ProfileSuggestion.js
 │   │   ├── ReportedComment.js
-│   │   ├── Survey.js
-│   │   └── SurveyResponse.js
+│   │   ├── ReputationConfig.js
+│   │   ├── ReputationLog.js
+│   │   ├── Stats.js
+│   │   └── TokenUsageStats.js
 │   ├── moderationProviders
 │   │   ├── DeepSeekModerationProvider.js
 │   │   ├── GeminiModerationProvider.js
@@ -63,37 +70,51 @@
 │   │   └── OpenAIModerationProvider.js
 │   ├── package.json
 │   ├── services
+│   │   ├── activeUsersService.js
+│   │   ├── activityProcessorService.js
 │   │   ├── activityService.js
 │   │   ├── authService.js
 │   │   ├── cacheService.js
 │   │   ├── captchaService.js
 │   │   ├── clientConfigService.js
-│   │   ├── commentAnalysisService.js
+│   │   ├── commentProcessingService.js
 │   │   ├── emailService.js
+│   │   ├── geoService.js
 │   │   ├── i18nService.js
 │   │   ├── languageService.js
 │   │   ├── loggerService.js
 │   │   ├── moderateService.js
+│   │   ├── notificationAggregatorService.js
+│   │   ├── onboardingService.js
 │   │   ├── profileService.js
 │   │   ├── pushService.js
+│   │   ├── queueFactory.js
+│   │   ├── reputationProcessorService.js
+│   │   ├── reputationService.js
 │   │   ├── ssoService.js
-│   │   ├── surveyService.js
+│   │   ├── statsRollupService.js
+│   │   ├── statsService.js
+│   │   ├── suggestService.js
+│   │   ├── tokenUsageService.js
 │   │   ├── toxicityService.js
-│   │   └── translateService.js
+│   │   ├── translateService.js
+│   │   └── userEventService.js
 │   ├── ssoProviders
 │   │   ├── AppleProvider.js
 │   │   ├── FacebookProvider.js
 │   │   ├── GoogleProvider.js
 │   │   ├── QueloraProvider.js
 │   │   └── XProvider.js
+│   ├── templates
+│   │   └── emails
+│   │       ├── notificationTemplate.js
+│   │       └── verificationTemplate.js
 │   └── utils
-│       ├── cacheUtils.js
 │       ├── cipher.js
-│       ├── commentAnalysisUtils.js
 │       ├── deepMerge.js
-│       ├── firstDefined.js
-│       ├── followStatusUtils.js
+│       ├── featureLoader.js
 │       ├── formatComment.js
+│       ├── geoUtils.js
 │       ├── imageHelper.js
 │       ├── notificationUtils.js
 │       ├── password.js
@@ -109,26 +130,19 @@
 │   ├── config
 │   │   └── commentAnalysisNolanPromptConfig.js
 │   ├── controllers
-│   │   ├── adCampaignController.js
 │   │   ├── adminController.js
-│   │   ├── advertiserProfileController.js
 │   │   ├── authController.js
 │   │   ├── clientController.js
 │   │   ├── mediaController.js
 │   │   ├── notificationsController.js
-│   │   ├── placementController.js
-│   │   ├── placementPricingController.js
 │   │   ├── statsController.js
-│   │   ├── surveyController.js
+│   │   ├── suggestionController.js
 │   │   └── userController.js
 │   ├── cron
-│   │   ├── adStatsJob.js
-│   │   ├── dailyRollupJob.js
 │   │   ├── discoveryJob.js
-│   │   ├── index.js
-│   │   ├── profileStatsJob.js
-│   │   ├── statsJob.js
-│   │   └── tokenUsageRollupJob.js
+│   │   └── index.js
+│   ├── data
+│   │   └── geoip_cache
 │   ├── locale
 │   │   ├── ar.json
 │   │   ├── de.json
@@ -147,29 +161,20 @@
 │   │   ├── roleAuthMiddleware.js
 │   │   └── uploadMiddleware.js
 │   ├── models
-│   │   ├── GeoPostStats.js
-│   │   ├── GeoStats.js
-│   │   ├── PostStats.js
-│   │   ├── ProfileStats.js
-│   │   ├── ProfileStatsDaily.js
-│   │   ├── Stats.js
-│   │   ├── TokenUsageStats.js
 │   │   ├── User.js
 │   │   └── UserSchema.js
 │   ├── package.json
 │   ├── public
 │   │   └── assets
+│   │       └── ads
 │   ├── routes
-│   │   ├── adCampaignRoutes.js
+│   │   ├── activateAllJobs.js
 │   │   ├── adminRoutes.js
-│   │   ├── advertiserProfileRoutes.js
 │   │   ├── authRoutes.js
 │   │   ├── clientRoutes.js
 │   │   ├── healthRoutes.js
 │   │   ├── mediaRoutes.js
 │   │   ├── notificationsRoutes.js
-│   │   ├── placementPricingRoutes.js
-│   │   ├── placementRoutes.js
 │   │   ├── routes.js
 │   │   ├── statsRoutes.js
 │   │   └── userRoutes.js
@@ -182,70 +187,145 @@
 │   │   ├── SeedRedditThread.js
 │   │   ├── SeedRedditThreadComments.js
 │   │   ├── backfillDailyStats.js
-│   │   ├── backfill_comment_roots
+│   │   ├── backfill_comment_roots.js
 │   │   ├── config
 │   │   │   └── geoData.js
 │   │   ├── empty.nosql
+│   │   ├── initJobsConfig.js
 │   │   ├── migrateClients.js
 │   │   ├── nohup.out
+│   │   ├── schemaSchore.nosql
 │   │   ├── seedAdminUser.js
 │   │   ├── seedComments.js
 │   │   ├── seedFakerUser.js
+│   │   ├── seedGamificationLevels.js
+│   │   ├── seedGamificationRules.js
+│   │   ├── seedGamificationShopItems.js
+│   │   ├── seedReputationConfigs.js
 │   │   ├── seedVAPID.js
-│   │   └── seed_start.sh
+│   │   ├── seed_start.sh
+│   │   └── seggestedbBackfill.js
+│   ├── services
+│   │   ├── commentAnalysisNolanService.js
+│   │   └── puppeteerService.js
+│   └── utils
+│       └── accessControl.js
+├── quelora-enterprise
+│   ├── controllers
+│   │   ├── adCampaignController.js
+│   │   ├── adController.js
+│   │   ├── advertiserProfileController.js
+│   │   ├── gamificationController.js
+│   │   ├── gamificationDashboardController.js
+│   │   ├── gamificationStoreController.js
+│   │   ├── placementController.js
+│   │   ├── placementPricingController.js
+│   │   ├── sseController.js
+│   │   ├── surveyController.js
+│   │   └── surveyDashboardController.js
+│   ├── index.js
+│   ├── locale
+│   │   ├── en.json
+│   │   └── es.json
+│   ├── middlewares
+│   │   ├── gamificationCapabilityMiddleware.js
+│   │   ├── sseAuthMiddleware.js
+│   │   └── uploadMiddlewareFactory.js
+│   ├── models
+│   │   ├── AdCampaign.js
+│   │   ├── AdClickLog.js
+│   │   ├── AdCreative.js
+│   │   ├── AdDailyStats.js
+│   │   ├── AdvertiserProfile.js
+│   │   ├── GamificationConfig.js
+│   │   ├── GamificationInventory.js
+│   │   ├── GamificationLedger.js
+│   │   ├── GamificationLevel.js
+│   │   ├── GamificationProfile.js
+│   │   ├── GamificationQuest.js
+│   │   ├── GamificationQuestProgress.js
+│   │   ├── GamificationRule.js
+│   │   ├── GamificationShopItem.js
+│   │   ├── Placement.js
+│   │   ├── PlacementPricing.js
+│   │   ├── Survey.js
+│   │   └── SurveyResponse.js
+│   ├── package.json
+│   ├── processors
+│   │   ├── adStatsJobProcessor.js
+│   │   └── gamificationJobProcessor.js
+│   ├── routes
+│   │   ├── adCampaignRoutes.js
+│   │   ├── adRoutes.js
+│   │   ├── advertiserProfileRoutes.js
+│   │   ├── gamificationDashboardRoutes.js
+│   │   ├── gamificationRoutes.js
+│   │   ├── gamificationStoreRoutes.js
+│   │   ├── placementPricingRoutes.js
+│   │   ├── placementRoutes.js
+│   │   ├── sseRoutes.js
+│   │   ├── surveyDashboardRoutes.js
+│   │   └── surveyRoutes.js
 │   ├── services
 │   │   ├── adCampaignService.js
 │   │   ├── adStatsService.js
-│   │   ├── commentAnalysisNolanService.js
-│   │   ├── puppeteerService.js
-│   │   ├── statsRollupService.js
-│   │   └── statsService.js
+│   │   ├── adsService.js
+│   │   ├── gamificationCapabilityService.js
+│   │   ├── gamificationProcessorService.js
+│   │   ├── gamificationService.js
+│   │   ├── gamificationStoreService.js
+│   │   ├── sseService.js
+│   │   ├── surveyService.js
+│   │   └── webSocketService.js
 │   ├── templates
 │   │   └── emails
-│   │       └── verificationTemplate.js
 │   └── utils
-│       └── accessControl.js
+│       ├── accessControl.js
+│       ├── gamificationNotificationUtils.js
+│       └── recordGamificationActivity.js
+├── quelora-jobs
+│   ├── .gitignore
+│   ├── index.js
+│   ├── package.json
+│   ├── queues.js
+│   └── scheduler.js
 ├── quelora-public-api
 │   ├── .env
 │   ├── .env.example
 │   ├── .gitignore
 │   ├── app.js
 │   ├── controllers
-│   │   ├── adController.js
 │   │   ├── commentController.js
 │   │   ├── notificationsController.js
 │   │   ├── postController.js
 │   │   ├── profileController.js
 │   │   ├── registrationController.js
-│   │   ├── ssoController.js
-│   │   └── surveyController.js
+│   │   └── ssoController.js
 │   ├── package.json
 │   ├── public
-│   │   ├── .gitkeep
 │   │   └── assets
-│   ├── routes
-│   │   ├── adRoutes.js
-│   │   ├── authRoutes.js
-│   │   ├── commentRoutes.js
-│   │   ├── notificationsRoutes.js
-│   │   ├── postRoutes.js
-│   │   ├── profileRoutes.js
-│   │   ├── routes.js
-│   │   ├── ssoRoutes.js
-│   │   └── surveyRoutes.js
-│   ├── services
-│   │   ├── adsService.js
-│   │   └── webSocketService.js
-│   └── templates
-│       └── emails
-│           └── verificationTemplate.js
+│   └── routes
+│       ├── authRoutes.js
+│       ├── commentRoutes.js
+│       ├── notificationsRoutes.js
+│       ├── postRoutes.js
+│       ├── profileRoutes.js
+│       ├── routes.js
+│       └── ssoRoutes.js
 ├── quelora-worker
 │   ├── .env
 │   ├── .gitignore
+│   ├── data
+│   │   └── geoip_cache
 │   ├── index.js
 │   ├── package.json
 │   └── processors
+│       ├── activityJobProcessor.js
+│       ├── aggregationProcessor.js
 │       ├── emailProcessor.js
-│       ├── metrics.js
-│       └── pushProcessor.js
+│       ├── enterpriseJobRouter.js
+│       ├── pushProcessor.js
+│       ├── reputationJobProcessor.js
+│       ├── suggestionJobProcessor.js
+│       └── systemJobProcessor.js
 └── struct.md
