@@ -1,4 +1,3 @@
-# Stage 1: Base image con Chrome
 FROM node:20-slim AS base
 RUN apt-get update && \
     apt-get install -y wget gnupg && \
@@ -14,51 +13,35 @@ RUN apt-get update && \
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 
-# Stage 2: Pruner (Instalador de dependencias de producción)
 FROM base AS pruner
 WORKDIR /usr/src/app
 RUN chown -R node:node /usr/src/app
 USER node
 
-# ----------------------------------------------------
-# ✅ COPIAS CORREGIDAS (Se asume que el BUILD corre desde la raíz del monorepo)
-# ----------------------------------------------------
-# 1. Copiar package.json RAÍZ
 COPY --chown=node:node package.json .
-
-# 2. Copiar los package.json de los workspaces
 COPY --chown=node:node packages/quelora-public-api/package.json ./packages/quelora-public-api/
 COPY --chown=node:node packages/quelora-common/package.json ./packages/quelora-common/
 COPY --chown=node:node packages/quelora-dashboard-api/package.json ./packages/quelora-dashboard-api/
+COPY --chown=node:node packages/quelora-enterprise/package.json ./packages/quelora-enterprise/
 
-# 3. Copiar el código fuente (para que npm resuelva dependencias locales)
 COPY --chown=node:node packages/quelora-public-api ./packages/quelora-public-api
 COPY --chown=node:node packages/quelora-common ./packages/quelora-common
 COPY --chown=node:node packages/quelora-dashboard-api ./packages/quelora-dashboard-api
+COPY --chown=node:node packages/quelora-enterprise ./packages/quelora-enterprise
 
-# Instalar solo dependencias de PRODUCCIÓN para todos los workspaces
-RUN npm install --only=production --no-optional
-# ----------------------------------------------------
+RUN npm install --only=production
 
-# Stage 3: Final (Imagen de producción)
 FROM base AS final
 WORKDIR /usr/src/app
 RUN chown -R node:node /usr/src/app
 USER node
 
-# 1. Copiar los node_modules optimizados desde el stage 'pruner'
 COPY --chown=node:node --from=pruner /usr/src/app/node_modules ./node_modules
-
-# 2. Copiar el package.json raíz (para el runtime si es necesario)
 COPY --chown=node:node --from=pruner /usr/src/app/package.json .
-
-# 3. Copiar el código fuente FINAL
-COPY --chown=node:node --from=pruner /usr/src/app/packages/quelora-public-api ./packages/quelora-public-api
 COPY --chown=node:node --from=pruner /usr/src/app/packages/quelora-common ./packages/quelora-common
 COPY --chown=node:node --from=pruner /usr/src/app/packages/quelora-dashboard-api ./packages/quelora-dashboard-api
+COPY --chown=node:node --from=pruner /usr/src/app/packages/quelora-enterprise ./packages/quelora-enterprise
 
-# Establecer el directorio de trabajo en la API del DASHBOARD
 WORKDIR /usr/src/app/packages/quelora-dashboard-api
-
 EXPOSE 3000
 CMD ["node", "app.js"]

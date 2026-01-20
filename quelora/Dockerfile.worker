@@ -1,50 +1,31 @@
-# Stage 1: Base image
 FROM node:20-slim AS base
 
-# Stage 2: Pruner (Instalador de dependencias de producción)
 FROM base AS pruner
 WORKDIR /usr/src/app
 RUN chown -R node:node /usr/src/app
 USER node
 
-# Copiar todos los package.json para resolver workspaces
 COPY --chown=node:node package.json .
-COPY --chown=node:node packages/quelora-public-api/package.json ./packages/quelora-public-api/
 COPY --chown=node:node packages/quelora-common/package.json ./packages/quelora-common/
-COPY --chown=node:node packages/quelora-dashboard-api/package.json ./packages/quelora-dashboard-api/
 COPY --chown=node:node packages/quelora-worker/package.json ./packages/quelora-worker/
 COPY --chown=node:node packages/quelora-enterprise/package.json ./packages/quelora-enterprise/
 
-# Copiar el código fuente necesario
-# (Nota: Para el worker no necesitas copiar public-api ni dashboard-api aquí si no quieres, 
-# pero si lo dejas no hace daño en la fase de build).
-COPY --chown=node:node packages/quelora-public-api ./packages/quelora-public-api
 COPY --chown=node:node packages/quelora-common ./packages/quelora-common
-COPY --chown=node:node packages/quelora-dashboard-api ./packages/quelora-dashboard-api
 COPY --chown=node:node packages/quelora-worker ./packages/quelora-worker
 COPY --chown=node:node packages/quelora-enterprise ./packages/quelora-enterprise
 
-# Instalar solo dependencias de PRODUCCIÓN
-RUN npm install --only=production --no-optional
+RUN npm install --only=production
 
-# Stage 3: Final (Imagen de producción)
 FROM base AS final
 WORKDIR /usr/src/app
 RUN chown -R node:node /usr/src/app
 USER node
 
-# Copiar los node_modules optimizados
 COPY --chown=node:node --from=pruner /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=pruner /usr/src/app/package.json .
-
-# Copiar el código fuente necesario para el worker y common
 COPY --chown=node:node --from=pruner /usr/src/app/packages/quelora-common ./packages/quelora-common
 COPY --chown=node:node --from=pruner /usr/src/app/packages/quelora-worker ./packages/quelora-worker
-
-# ✅ NUEVO: Copiar Enterprise a la imagen final para que el Router lo encuentre
 COPY --chown=node:node --from=pruner /usr/src/app/packages/quelora-enterprise ./packages/quelora-enterprise
 
-# Establecer el directorio de trabajo en el WORKER
 WORKDIR /usr/src/app/packages/quelora-worker
-
 CMD ["node", "index.js"]

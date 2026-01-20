@@ -31,7 +31,7 @@ services:
     container_name: dashboard
     working_dir: /usr/src/app
     volumes:
-      - ./source/quelora-dashboard:/usr/src/app
+      - ./quelora/packages/quelora-dashboard:/usr/src/app
       - dashboard_node_modules:/usr/src/app/node_modules
       - ./utils/tree.js:/usr/src/app/tree.js:ro
     command: sh -c "npm install && npm run start"
@@ -70,7 +70,7 @@ services:
     working_dir: /usr/src/app
     volumes:
       - ./source/quelora-demo:/usr/src/app
-      - ./source/quelora-client:/usr/src/app/quelora:rW
+      - ./quelora/packages/quelora-widget:/usr/src/app/quelora:rW
       - demo_node_modules:/usr/src/app/node_modules
       - ./utils/tree.js:/usr/src/app/tree.js:ro
     command: sh -c "npm install && npx nodemon run.js"
@@ -117,7 +117,7 @@ services:
     container_name: quelora-dashboard-api
     build:
       context: ./quelora
-      dockerfile: Dockerfile.dashboard-api
+      dockerfile: Dockerfile.api.dashboard
     volumes:
       - ./quelora/packages/quelora-dashboard-api:/usr/src/app/packages/quelora-dashboard-api
       - ./quelora/packages/quelora-common:/usr/src/app/packages/quelora-common
@@ -125,6 +125,7 @@ services:
       - ./quelora/packages/quelora-enterprise:/usr/src/app/packages/quelora-enterprise
       - ./utils/tree.js:/usr/src/app/tree.js:ro
       - app_monorepo_node_modules:/usr/src/app/node_modules
+      - ./quelora-storage/geoip:/data/geoip
     env_file:
       - ./quelora/packages/quelora-dashboard-api/.env 
     command: sh -c "npm install && npx nodemon app.js"
