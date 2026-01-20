@@ -3,3 +3,19 @@ mongo/*
 certs/*
 !certs/.gitkeep
 .env
+# Dependencias
+node_modules/
+**/node_modules/
+
+# Almacenamiento y Archivos Grandes
+quelora-storage/geoip/*
+!quelora-storage/geoip/.gitkeep
+
+# Variables de entorno y secretos
+*.env
+.env.*
+.versions.bak
+
+# Logs
+*.log
+npm-debug.log*
