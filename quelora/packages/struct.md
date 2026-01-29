@@ -121,6 +121,7 @@
 │       ├── notificationUtils.js
 │       ├── password.js
 │       ├── profileUtils.js
+│       ├── rankingUtils.js
 │       ├── recordProfileActivity.js
 │       ├── recordStatsActivity.js
 │       └── textUtils.js
@@ -709,7 +710,13 @@
 │   ├── package.json
 │   ├── public
 │   │   └── assets
-│   │       └── ads
+│   │       ├── ads
+│   │       └── gamification
+│   │           └── QU-ME7MZ3WI-3CUPR
+│   │               ├── file-1769284883154-375936348.png
+│   │               ├── file-1769285083094-177808063.png
+│   │               ├── file-1769285241675-594861249.png
+│   │               └── file-1769285868668-376485805.png
 │   ├── routes
 │   │   ├── activateAllJobs.js
 │   │   ├── adminRoutes.js
@@ -737,6 +744,7 @@
 │   │   ├── empty.nosql
 │   │   ├── initJobsConfig.js
 │   │   ├── migrateClients.js
+│   │   ├── migrateResilienceConfig.js
 │   │   ├── schemaSchore.nosql
 │   │   ├── seedAdminUser.js
 │   │   ├── seedComments.js
@@ -745,10 +753,12 @@
 │   │   ├── seedGamificationRules.js
 │   │   ├── seedGamificationShopItems.js
 │   │   ├── seedReputationConfigs.js
+│   │   ├── seedReputationLogs.js
 │   │   ├── seedResilienceKeys.js
 │   │   ├── seedVAPID.js
 │   │   ├── seed_start.sh
-│   │   └── seggestedbBackfill.js
+│   │   ├── seggestedbBackfill.js
+│   │   └── triggerNow.js
 │   ├── services
 │   │   ├── commentAnalysisNolanService.js
 │   │   └── puppeteerService.js
@@ -773,7 +783,9 @@
 │   │   ├── en.json
 │   │   └── es.json
 │   ├── middlewares
+│   │   ├── captureAnonymousPeerMiddleware.js
 │   │   ├── gamificationCapabilityMiddleware.js
+│   │   ├── resilienceBootstrapMiddleware.js
 │   │   ├── sseAuthMiddleware.js
 │   │   └── uploadMiddlewareFactory.js
 │   ├── models
@@ -806,6 +818,7 @@
 │   │   ├── gamificationDashboardRoutes.js
 │   │   ├── gamificationRoutes.js
 │   │   ├── gamificationStoreRoutes.js
+│   │   ├── p2pDashboardRoutes.js
 │   │   ├── p2pRoutes.js
 │   │   ├── placementPricingRoutes.js
 │   │   ├── placementRoutes.js
@@ -849,6 +862,7 @@
 │   │   ├── profileController.js
 │   │   ├── registrationController.js
 │   │   └── ssoController.js
+│   ├── nodemon.json
 │   ├── package.json
 │   ├── public
 │   │   └── assets
@@ -2480,6 +2494,7 @@
 │   │   ├── toast.css
 │   │   └── variables.css
 │   ├── js
+│   │   ├── .gitignore
 │   │   ├── core
 │   │   │   ├── conf.js
 │   │   │   ├── core.js
@@ -2494,105 +2509,6 @@
 │   │   │   ├── storage.js
 │   │   │   └── utils.js
 │   │   ├── dist
-│   │   │   ├── locales
-│   │   │   │   ├── ar
-│   │   │   │   │   ├── common.json
-│   │   │   │   │   ├── gamification.json
-│   │   │   │   │   ├── live.json
-│   │   │   │   │   ├── notifications.json
-│   │   │   │   │   ├── profile.json
-│   │   │   │   │   └── survey.json
-│   │   │   │   ├── common.json
-│   │   │   │   ├── de
-│   │   │   │   │   ├── common.json
-│   │   │   │   │   ├── gamification.json
-│   │   │   │   │   ├── live.json
-│   │   │   │   │   ├── notifications.json
-│   │   │   │   │   ├── profile.json
-│   │   │   │   │   └── survey.json
-│   │   │   │   ├── en
-│   │   │   │   │   ├── common.json
-│   │   │   │   │   ├── gamification.json
-│   │   │   │   │   ├── live.json
-│   │   │   │   │   ├── notifications.json
-│   │   │   │   │   ├── profile.json
-│   │   │   │   │   └── survey.json
-│   │   │   │   ├── es
-│   │   │   │   │   ├── common.json
-│   │   │   │   │   ├── gamification.json
-│   │   │   │   │   ├── live.json
-│   │   │   │   │   ├── notifications.json
-│   │   │   │   │   ├── profile.json
-│   │   │   │   │   └── survey.json
-│   │   │   │   ├── fr
-│   │   │   │   │   ├── common.json
-│   │   │   │   │   ├── gamification.json
-│   │   │   │   │   ├── live.json
-│   │   │   │   │   ├── notifications.json
-│   │   │   │   │   ├── profile.json
-│   │   │   │   │   └── survey.json
-│   │   │   │   ├── gamification.json
-│   │   │   │   ├── he
-│   │   │   │   │   ├── common.json
-│   │   │   │   │   ├── gamification.json
-│   │   │   │   │   ├── live.json
-│   │   │   │   │   ├── notifications.json
-│   │   │   │   │   ├── profile.json
-│   │   │   │   │   └── survey.json
-│   │   │   │   ├── hi
-│   │   │   │   │   ├── common.json
-│   │   │   │   │   ├── gamification.json
-│   │   │   │   │   ├── live.json
-│   │   │   │   │   ├── notifications.json
-│   │   │   │   │   ├── profile.json
-│   │   │   │   │   └── survey.json
-│   │   │   │   ├── it
-│   │   │   │   │   ├── common.json
-│   │   │   │   │   ├── gamification.json
-│   │   │   │   │   ├── live.json
-│   │   │   │   │   ├── notifications.json
-│   │   │   │   │   ├── profile.json
-│   │   │   │   │   └── survey.json
-│   │   │   │   ├── ja
-│   │   │   │   │   ├── common.json
-│   │   │   │   │   ├── gamification.json
-│   │   │   │   │   ├── live.json
-│   │   │   │   │   ├── notifications.json
-│   │   │   │   │   ├── profile.json
-│   │   │   │   │   └── survey.json
-│   │   │   │   ├── live.json
-│   │   │   │   ├── notifications.json
-│   │   │   │   ├── profile.json
-│   │   │   │   ├── pt
-│   │   │   │   │   ├── common.json
-│   │   │   │   │   ├── gamification.json
-│   │   │   │   │   ├── live.json
-│   │   │   │   │   ├── notifications.json
-│   │   │   │   │   ├── profile.json
-│   │   │   │   │   └── survey.json
-│   │   │   │   ├── ru
-│   │   │   │   │   ├── common.json
-│   │   │   │   │   ├── gamification.json
-│   │   │   │   │   ├── live.json
-│   │   │   │   │   ├── notifications.json
-│   │   │   │   │   ├── profile.json
-│   │   │   │   │   └── survey.json
-│   │   │   │   ├── survey.json
-│   │   │   │   └── zh
-│   │   │   │       ├── common.json
-│   │   │   │       ├── gamification.json
-│   │   │   │       ├── live.json
-│   │   │   │       ├── notifications.json
-│   │   │   │       ├── profile.json
-│   │   │   │       └── survey.json
-│   │   │   ├── quelora.js
-│   │   │   ├── quelora.js.map
-│   │   │   ├── sw.js
-│   │   │   └── worker
-│   │   │       ├── pkg
-│   │   │       │   ├── quelora_image_processor_bg.wasm
-│   │   │       │   └── quelora_markdown_parser_bg.wasm
-│   │   │       └── queloraWorker.js
 │   │   ├── locales
 │   │   │   ├── ar
 │   │   │   │   ├── common.json
@@ -2691,7 +2607,8 @@
 │   │   │   │   ├── mention.js
 │   │   │   │   └── quote.js
 │   │   │   ├── gamification
-│   │   │   │   └── gamification.js
+│   │   │   │   ├── gamification.js
+│   │   │   │   └── gamification.ui.js
 │   │   │   ├── notifications
 │   │   │   │   ├── notificationRouter.js
 │   │   │   │   ├── notifications.js
@@ -2741,11 +2658,11 @@
 │   │   │   └── trystero.min.js
 │   │   └── worker
 │   │       ├── modules
-│   │       │   ├── endpoints.js
-│   │       │   ├── resilience-manager.js
-│   │       │   ├── resilience.js
-│   │       │   ├── sse.js
-│   │       │   └── utils.js
+│   │       │   ├── endpointsWorker.js
+│   │       │   ├── resilienceManager.js
+│   │       │   ├── resilienceWorker.js
+│   │       │   ├── sseWorker.js
+│   │       │   └── utilsWorker.js
 │   │       ├── pkg
 │   │       │   ├── .gitignore
 │   │       │   ├── package.json
@@ -2772,6 +2689,7 @@
 │       ├── aggregationProcessor.js
 │       ├── emailProcessor.js
 │       ├── enterpriseJobRouter.js
+│       ├── gravityDecayJob.js
 │       ├── pushProcessor.js
 │       ├── reputationJobProcessor.js
 │       ├── suggestionJobProcessor.js

@@ -1,4 +1,4 @@
-api=2.5
-dashboard=2.3
-worker=2.1
-jobs=2.1
+api=3.0
+dashboard=2.4
+worker=2.3
+jobs=2.3
