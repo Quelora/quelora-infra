@@ -126,6 +126,7 @@ services:
       - ./utils/tree.js:/usr/src/app/tree.js:ro
       - app_monorepo_node_modules:/usr/src/app/node_modules
       - ./quelora-storage/geoip:/data/geoip
+      - ./quelora-storage/assets:/usr/src/app/packages/quelora-dashboard-api/public/assets
     env_file:
       - ./quelora/packages/quelora-dashboard-api/.env 
     command: sh -c "npm install && npx nodemon app.js"
