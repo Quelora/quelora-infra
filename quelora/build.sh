@@ -128,9 +128,10 @@ echo "1. API (quelora-api)"
 echo "2. Dashboard API (quelora-dashboard-api)"
 echo "3. Worker (quelora-worker)"
 echo "4. Jobs (quelora-jobs)"
-echo "5. Todo (All)"
+echo "5. Dashboard"
+echo "6. Todo (All)"
 echo "----------------------------------------"
-read -p "Opción (1-5): " option
+read -p "Opción (1-6): " option
 echo ""
 
 case $option in
@@ -138,7 +139,7 @@ case $option in
         build_and_push "api" "quelora-api" "Dockerfile.api"
         ;;
     2)
-        build_and_push "dashboard" "quelora-dashboard-api" "Dockerfile.api.dashboard"
+        build_and_push "dashboard-api" "quelora-dashboard-api" "Dockerfile.api.dashboard"
         ;;
     3)
         build_and_push "worker" "quelora-worker" "Dockerfile.worker"
@@ -147,11 +148,15 @@ case $option in
         build_and_push "jobs" "quelora-jobs" "Dockerfile.jobs"
         ;;
     5)
+        build_and_push "dashboard" "quelora-dashboard" "Dockerfile.dashboard"
+        ;;
+    6)
         echo -e "${YELLOW}🚀  Procesando TODO el stack...${NC}"
-        build_and_push "api" "quelora-api" "Dockerfile.api"
+        build_and_push "api-api" "quelora-api" "Dockerfile.api"
         build_and_push "dashboard" "quelora-dashboard-api" "Dockerfile.api.dashboard"
         build_and_push "worker" "quelora-worker" "Dockerfile.worker"
         build_and_push "jobs" "quelora-jobs" "Dockerfile.jobs"
+        build_and_push "dashboard" "quelora-dashboard" "Dockerfile.dashboard"
         echo -e "${GREEN}✨  Proceso global finalizado.${NC}"
         ;;
     *)
